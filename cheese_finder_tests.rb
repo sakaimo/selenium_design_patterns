@@ -1,8 +1,6 @@
 require 'rubygems'
 require 'selenium-webdriver'
-#require 'minitest/autorun'
 require 'test/unit'
-
 
 class CheeseFinderTests < Test::Unit::TestCase
 
