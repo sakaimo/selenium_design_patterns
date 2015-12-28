@@ -1,58 +1,101 @@
 require 'rubygems'
 require 'selenium-webdriver'
 require 'test/unit'
+require File.join(File.dirname(__FILE__), 'test_data')
 
 class ProductReview < Test::Unit::TestCase
+
+  def setup
+    @selenium = Selenium::WebDriver.for(:firefox)
+  end
+
+  def teardown
+    @selenium.quit
+  end
+
   def test_add_new_review
-    selenium = Selenium::WebDriver.for(:firefox)
-    selenium.get("http://awful-valentine.com/")
+    unique_comment = generate_unique_comment
+    review_id = generate_new_product_review(unique_comment)
 
-    selenium.find_element(:css, '.special-item a[href*="our-love-is-special"].more-info').click
-    assert_equal("http://awful-valentine.com/our-love-is-special/", selenium.current_url)
-    assert_equal("Our love is special!", selenium.find_element(:css, ".category-title").text)
-
-    selenium.find_element(:id, "author").send_keys("Sakaimo")
-    selenium.find_element(:id, "email").send_keys("sakaimo@selenium.com")
-    selenium.find_element(:id, "url").send_keys("http://awful-valentine.com")
-    selenium.find_element(:css, "a[title='5']").click
-    selenium.find_element(:id, "comment").clear
-    selenium.find_element(:id, "comment").send_keys("3 This is a comment for product. #{ENV['USERNAME'] || ENV['USER']}")
-    selenium.find_element(:id, "submit").click
-
-    review_id = selenium.current_url.split("#").last
-    review    = selenium.find_element(:id, review_id)
+    review = find_element(:id, review_id)
 
     name    = review.find_element(:class, "comment-author-metainfo").find_element(:class, "url").text
     comment = review.find_element(:class, "comment-content").text
 
     assert_equal("Sakaimo", name)
-    assert_equal("3 This is a comment for product. #{ENV['USERNAME'] || ENV['USER']}", comment)
+    assert_equal(unique_comment, comment)
 
     parsed_date = DateTime.parse(review.find_element(:class, "comment-author-metainfo").find_element(:class, "commentmetadata").text)
     assert_equal(Date.today.year, parsed_date.year)
     assert_equal(Date.today.month, parsed_date.month)
     assert_equal(Date.today.day, parsed_date.day)
-
-    selenium.quit
   end
 
   def test_adding_a_duplicate_review
-    selenium = Selenium::WebDriver.for(:firefox)
-    selenium.get("http://awful-valentine.com/")
+    unique_comment = generate_unique_comment
+    generate_new_product_review(unique_comment)
+    sleep 10
+    generate_new_product_review(unique_comment)
 
-    selenium.find_element(:css, '.special-item a[href*="our-love-is-special"].more-info').click
-
-    selenium.find_element(:id, "author").send_keys("Sakaimo")
-    selenium.find_element(:id, "email").send_keys("sakaimo@selenium.com")
-    selenium.find_element(:id, "url").send_keys("http://awful-valentine.com")
-    selenium.find_element(:css, "a[title='5']").click
-    selenium.find_element(:id, "comment").clear
-    selenium.find_element(:id, "comment").send_keys("3 This is a comment for product. #{ENV['USERNAME'] || ENV['USER']}")
-    selenium.find_element(:id, "submit").click
-
-    error = selenium.find_element(:id, "error-page").text
+    error = @selenium.find_element(:id, "error-page").text
     assert_equal("Duplicate comment detected; it looks as though you’ve already said that!", error)
+  end
 
-    selenium.quit
+  private
+
+  def find_element(how=:css, what)
+    @selenium.find_element(how, what)
+  end
+
+  def type_text(text, how=:css, what)
+    find_element(how, what).clear
+    find_element(how, what).send_keys(text)
+  end
+
+  def click(how=:css, what)
+    find_element(how, what).click
+  end
+
+
+  def select_desired_product_on_homepage
+    @selenium.find_element(:css, '.special-item a[href*="our-love-is-special"].more-info').click
+  end
+
+  def fill_out_comment_form(comment)
+    @selenium.find_element(:id, "author").clear
+    @selenium.find_element(:id, "author").send_keys("Sakaimo")
+    @selenium.find_element(:id, "email").send_keys("sakaimo@selenium.com")
+    @selenium.find_element(:id, "url").send_keys("http://awful-valentine.com")
+    @selenium.find_element(:css, "a[title='5']").click
+    @selenium.find_element(:id, "comment").clear
+    @selenium.find_element(:id, "comment").send_keys(comment)
+    @selenium.find_element(:id, "submit").click
+  end
+  # def fill_out_comment_form(comment)
+  #   type_text("Sakaimo", :id, "author")
+  #   type_text("sakaimo@selenium.com", :id, "email")
+  #   type_text("http://awful-valentine.com", :id, "url")
+  #   click(:css, "a[title='5']")
+  #   type_text(comment, :id, "comment")
+  #   click(:id, "submit")
+  # end
+
+  def generate_unique_comment
+    "This is a comment for product and is for #{Time.now.to_i}"
+  end
+
+  def navigate_to_homepage
+    @selenium.get(TestData.get_base_url)
+  end
+
+  def get_newly_created_review_id
+    @selenium.current_url.split("#").last
+  end
+
+  def generate_new_product_review(review)
+    navigate_to_homepage
+    select_desired_product_on_homepage
+    fill_out_comment_form(review)
+    get_newly_created_review_id
   end
 end
