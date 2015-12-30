@@ -6,6 +6,7 @@ require File.join(File.dirname(__FILE__), 'test_data')
 class ProductReview < Test::Unit::TestCase
 
   def setup
+    @product_permalink = TestData.get_product_fixtures["fixture_4"]["url"]
     @selenium = Selenium::WebDriver.for(:firefox)
   end
 
@@ -56,29 +57,18 @@ class ProductReview < Test::Unit::TestCase
     find_element(how, what).click
   end
 
-
-  def select_desired_product_on_homepage
-    @selenium.find_element(:css, '.special-item a[href*="our-love-is-special"].more-info').click
+  def select_desired_product_on_homepage(permalink)
+    click(:css, ".special-item a[href*='#{permalink}'].more-info")
   end
 
   def fill_out_comment_form(comment)
-    @selenium.find_element(:id, "author").clear
-    @selenium.find_element(:id, "author").send_keys("Sakaimo")
-    @selenium.find_element(:id, "email").send_keys("sakaimo@selenium.com")
-    @selenium.find_element(:id, "url").send_keys("http://awful-valentine.com")
-    @selenium.find_element(:css, "a[title='5']").click
-    @selenium.find_element(:id, "comment").clear
-    @selenium.find_element(:id, "comment").send_keys(comment)
-    @selenium.find_element(:id, "submit").click
+    type_text("Sakaimo", :id, "author")
+    type_text("sakaimo@selenium.com", :id, "email")
+    type_text("http://awful-valentine.com", :id, "url")
+    click(:css, "a[title='5']")
+    type_text(comment, :id, "comment")
+    click(:id, "submit")
   end
-  # def fill_out_comment_form(comment)
-  #   type_text("Sakaimo", :id, "author")
-  #   type_text("sakaimo@selenium.com", :id, "email")
-  #   type_text("http://awful-valentine.com", :id, "url")
-  #   click(:css, "a[title='5']")
-  #   type_text(comment, :id, "comment")
-  #   click(:id, "submit")
-  # end
 
   def generate_unique_comment
     "This is a comment for product and is for #{Time.now.to_i}"
@@ -94,7 +84,7 @@ class ProductReview < Test::Unit::TestCase
 
   def generate_new_product_review(review)
     navigate_to_homepage
-    select_desired_product_on_homepage
+    select_desired_product_on_homepage(@product_permalink)
     fill_out_comment_form(review)
     get_newly_created_review_id
   end

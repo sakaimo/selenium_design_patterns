@@ -1,9 +1,18 @@
 require 'yaml'
+require 'net/http'
+require 'json'
 
 class TestData
-  def self.get_production_fixtures
-    fixture_file = File.join(File.dirname(__FILE__), 'production_fixtures.yml')
+
+  def self.get_product_fixtures
+    fixture_file = File.join(File.dirname(__FILE__), 'product_fixtures.yml')
     YAML.load_file(fixture_file)
+  end
+
+  def self.get_products_from_api
+    uri = URI.parse("http://api.awful-valentine.com/")
+    json_string = Net::HTTP.get(uri)
+    JSON.parse(json_string)
   end
 
   def self.get_base_url
