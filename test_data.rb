@@ -13,7 +13,7 @@ class TestData
   def self.get_credit_card_expiry_date
     Faker::Business.credit_card_expiry_date
   end
-  
+
   def self.get_full_name
     Faker::Name.name
   end
@@ -53,7 +53,7 @@ class TestData
   def self.get_base_url
     {
       "production" => "http://awful-valentine.com/",
-      "staging"    => "http://stating.awful-valentine.com/",
+      "staging"    => "http://staging.awful-valentine.com/",
       "test"       => "http://test.awful-valentine.com/"
     }[self.get_environment]
   end
