@@ -5,6 +5,15 @@ require 'faker'
 
 
 class TestData
+
+  def self.get_credit_card_number
+    Faker::Business.credit_card_number
+  end
+
+  def self.get_credit_card_expiry_date
+    Faker::Business.credit_card_expiry_date
+  end
+  
   def self.get_full_name
     Faker::Name.name
   end
