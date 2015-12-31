@@ -15,8 +15,8 @@ class ProductReview < Test::Unit::TestCase
   end
 
   def test_add_new_review
-    unique_comment = generate_unique_comment
-    review_id = generate_new_product_review(unique_comment)
+    review_form_info = TestData.get_comment_form_values({:name => "Sakaimo"})
+    review_id = generate_new_product_review(review_form_info)
 
     review = find_element(:id, review_id)
 
@@ -24,7 +24,7 @@ class ProductReview < Test::Unit::TestCase
     comment = review.find_element(:class, "comment-content").text
 
     assert_equal("Sakaimo", name)
-    assert_equal(unique_comment, comment)
+    assert_equal(review_form_info[:comment], comment)
 
     parsed_date = DateTime.parse(review.find_element(:class, "comment-author-metainfo").find_element(:class, "commentmetadata").text)
     assert_equal(Date.today.year, parsed_date.year)
@@ -33,12 +33,12 @@ class ProductReview < Test::Unit::TestCase
   end
 
   def test_adding_a_duplicate_review
-    unique_comment = generate_unique_comment
-    generate_new_product_review(unique_comment)
+    review_form_info = TestData.get_comment_form_values
+    generate_new_product_review(review_form_info)
     sleep 10
-    generate_new_product_review(unique_comment)
+    generate_new_product_review(review_form_info)
 
-    error = @selenium.find_element(:id, "error-page").text
+    error = find_element(:id, "error-page").text
     assert_equal("Duplicate comment detected; it looks as though you’ve already said that!", error)
   end
 
@@ -61,12 +61,12 @@ class ProductReview < Test::Unit::TestCase
     click(:css, ".special-item a[href*='#{permalink}'].more-info")
   end
 
-  def fill_out_comment_form(comment)
-    type_text("Sakaimo", :id, "author")
-    type_text("sakaimo@selenium.com", :id, "email")
-    type_text("http://awful-valentine.com", :id, "url")
+  def fill_out_comment_form(form_info)
+    type_text(form_info[:name], :id, "author")
+    type_text(form_info[:email], :id, "email")
+    type_text(form_info[:url], :id, "url")
     click(:css, "a[title='5']")
-    type_text(comment, :id, "comment")
+    type_text(form_info[:comment], :id, "comment")
     click(:id, "submit")
   end
 

@@ -1,8 +1,34 @@
 require 'yaml'
 require 'net/http'
 require 'json'
+require 'faker'
+
 
 class TestData
+  def self.get_full_name
+    Faker::Name.name
+  end
+
+  def self.get_email
+    Faker::Internet.email
+  end
+
+  def self.get_website
+    Faker::Internet.url
+  end
+
+  def self.get_buzzword
+    Faker::Company.catch_phrase
+  end
+
+  def self.get_comment_form_values(overwrites = {})
+    {
+      :name    => self.get_full_name,
+      :email   => self.get_email,
+      :url     => self.get_website,
+      :comment => self.get_buzzword
+    }.merge(overwrites)
+  end
 
   def self.get_product_fixtures
     fixture_file = File.join(File.dirname(__FILE__), 'product_fixtures.yml')
