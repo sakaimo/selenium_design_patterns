@@ -12,15 +12,22 @@ class TestUnitExample < Test::Unit::TestCase
     @selenium.quit
   end
 
-  def test_cart_on_contact_page
+  # def test_cart_on_contact_page
+  #   @selenium.get "http://awful-valentine.com/"
+  #   page = HomePage.new(@selenium)
+  #   page.special_items.first.add_to_cart
+  #   @selenium.get "http://awful-valentine.com/contact-us"
+  #
+  #   page = ContactUsPage.new(@selenium)
+  #   assert_equal("You have 1 item ($5.77) in your shopping cart.", page.sidebar.cart.summary)
+  #   assert_equal("$5.77", page.sidebar.cart.subtotal)
+  # end
+
+  #P174 練習問題：商品名で指定する
+  def test_cart_on_homepage
     @selenium.get "http://awful-valentine.com/"
     page = HomePage.new(@selenium)
-    page.special_items.first.add_to_cart
-    @selenium.get "http://awful-valentine.com/contact-us"
+    page.special_items.find("Lets Grow Old Together!")
 
-    page = ContactUsPage.new(@selenium)
-    assert_equal("You have 1 item ($5.77) in your shopping cart.", page.sidebar.cart.summary)
-    assert_equal("$5.77", page.sidebar.cart.subtotal)
   end
-
 end
